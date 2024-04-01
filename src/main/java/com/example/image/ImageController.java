@@ -2,13 +2,14 @@ package com.example.image;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/addImage")
@@ -42,10 +41,27 @@ public class ImageController {
 		try(FileOutputStream out = new FileOutputStream(filePath)) {
 			FileCopyUtils.copy(file.getInputStream(), out);
 			return fileName;
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	
+	@GetMapping("img/files")
+	public Resource getfile(@RequestParam String filename) {
+		File filePath = new File(BASEPATH, filename);
+//		System.out.println(filePath);
+		try {
+			Resource resource = new UrlResource(filePath.toURI());
+			return resource;
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+
+			e.printStackTrace();
+			throw new RuntimeException("Could not read the file!");
+		}
 	}
 
 	@GetMapping
